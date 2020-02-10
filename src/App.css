@@ -19,18 +19,19 @@
 
 .inputFormula {
   color: orange;
-  font-size: 20px;
-  line-height: 20px;
+  margin-top:5px;
+  font-size: 24px;
+  line-height: 24px;
   text-align: right;
-  min-height: 20px;
+  min-height: 24px;
 }
 
 .output {
   color: white;
-  font-size: 24px;
+  font-size: 30px;
   text-align: right;
-  max-height: 24px;
-  line-height: 24px;
+  max-height: 30px;
+  line-height: 30px;
   margin-bottom:5px;
 }
 
