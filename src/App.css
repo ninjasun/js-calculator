@@ -1,38 +1,80 @@
 .App {
-  text-align: center;
+  
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+  border: 2px solid #47476b;
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  height: auto;
+  padding: 5px;
+  width: 320px;
+  background-color: black;
+  
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.inputFormula {
+  color: orange;
+  font-size: 20px;
+  line-height: 20px;
+  text-align: right;
+  min-height: 20px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.output {
   color: white;
+  font-size: 24px;
+  text-align: right;
+  max-height: 24px;
+  line-height: 24px;
+  margin-bottom:5px;
 }
 
-.App-link {
-  color: #61dafb;
+button {
+  margin:0;
+  padding: 0;
+  border: 1px solid black;
+  color: white;
+  font-size: 20px;
+  width: 80px;
+  height: 80px;
+  display: inline-block;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button:hover{
+  border: 1px solid white;
+  color: black;
+}
+
+.btn-large {
+  width: 160px;
+}
+
+.btn-long{
+  height: 160px;
+}
+
+.bg-grey {
+  background: rgb(102, 102, 102);
+}
+
+.bg-dark-grey{
+  background: #4d4d4d;
+}
+.bg-dark-red{
+  background: rgb(172, 57, 57);
+}
+
+.bg-dark-blue{
+  background: rgb(0, 68, 102);
+}
+
+#equals {
+  position: absolute;
+  right:5px;
+  bottom: 5px;
 }
