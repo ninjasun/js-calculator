@@ -43,7 +43,7 @@ function calc(a, b, operator){
 
 /**
  * 
- * @param {*} list ["89","+","45","-","9"]
+ * @param {*} list ["89","+","45","-","-9"]
  */
 
 function getMagic(list){
@@ -116,9 +116,9 @@ class App extends React.Component {
   }
 
   handleStartCalc = ({dataCalc, expr, char }) => {
-    console.log("handleStartCalc dataCalc: ", dataCalc );
-    console.log("handleStartCalc expr: ", expr);
-    console.log("handleStartCalc char: ", char);
+    //console.log("handleStartCalc dataCalc: ", dataCalc );
+    //console.log("handleStartCalc expr: ", expr);
+    //console.log("handleStartCalc char: ", char);
 
     this.setState({
       calcResult: 0,
@@ -223,22 +223,19 @@ class App extends React.Component {
         console.log("Input not valid: ", e.target.value)
       }
     }
-    
   }
 
   onCalculus=()=>{
     
     const { data, expression } = this.state;
-    console.log("!!! onCalculus: ", data );
-    console.log("!!! expression: ", expression );
 
     var copyData = [...data];
     var result = getMagic(copyData);
-    console.log("equals: ", result);
+
     this.setState({
       equals: result + "",
       calcResult: result,
-      expression: this.state.expression + "=" + result
+      expression: expression + "=" + result
     })
   }
 
