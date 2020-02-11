@@ -132,12 +132,13 @@ class App extends React.Component {
     const newChar = e.target.value;
     const empty = "";
     const { data, calcResult } = this.state;
+    const _NEG = "NEGATIVE";
 
     let lastInput = data.length > 0 ? data[this.state.data.length-1] : empty ;
     let lastChar = lastInput === empty ? empty : lastInput[lastInput.length-1];
     let updated = null;
     let newData = [];
-
+    /** primo input dopo il calcolo */
     if(calcResult > 0  ){
       const updateCalc = {
         char: newChar,
@@ -159,37 +160,60 @@ class App extends React.Component {
     }  
     else{
       if (isValid({lastInput, newChar})){
-          // newChar = .    lastChar numero   => [REPLACE]
-          if(newChar === "." && numberSet.includes(lastChar)){
-            updated = lastInput + newChar; //APPEND
-            newData = replace(data, updated);
+          /**   CLICK ON 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 */
+          if (numberSet.includes(newChar)){
+              /** ultimo inserito è  NEGATIVE */
+              if(lastInput === _NEG){
+                updated = "-"; 
+                newData = replace(data, "-" + newChar);
+              }
+              /** ultimo inserito è operatore o stringa vuota iniziale.  +  -  *  /  "" */
+              else if (opSet.includes(lastChar) || lastChar === empty){
+                updated = newChar;  //tutti i numeri inseriti sono positivi
+                newData = add(data, updated);
+              }
+              /** ultimo inserito è un numero o . */
+              else if (numberSet.includes(lastChar) || lastChar === "."){
+                updated = lastInput + newChar; //APPEND
+                newData = replace(data, updated);
+              }
           }
-          //newChar = numero   lastChar operatore || ''  => [ADD]
-          else if((opSet.includes(lastChar) || lastChar === empty) && numberSet.includes(newChar)){
-            //push nuvo input
-            updated = newChar;
-            newData = add(data, updated)
+          /**   CLICK ON -, +, *, /    *****/
+          else if(opSet.includes(newChar)){
+            /** ultimo inserito è un numero */
+              if (numberSet.includes(lastChar)){
+                updated = newChar;  
+                newData = add(data, updated);
+              }
+              /** ultimo inserito è _NEG significa che ho già due operatori */
+              else if (lastInput === _NEG){
+                /** elimino ultimo e aggiorno operatore */
+                updated = newChar;
+                var popper = [...data];
+                popper.pop();
+                newData = replace(popper, updated)
+              }
+              /** ultimo inserito è un operatore (ma non -)  e sto inserendo - */
+              else if((lastChar === "+" || lastChar === "*" || lastChar === "/") && newChar === "-"){
+                /** CASI 5* -5 | 5/ -2 | 5+ -3 */
+                updated = newChar;  
+                newData = add(data, _NEG);
+              }
+              else {
+                updated = newChar; /** l'ultimo operatore vince */
+                newData = replace(data, updated);
+              }
           }
-          //numero dopo numero o . [REPLACE]
-          else if(numberSet.includes(newChar)  && (numberSet.includes(lastChar) || lastChar === ".")) {
-            updated = lastInput + newChar;  //APPEND
-            newData = replace(data, updated)
-          }
-          // operatore dopo operatore  [REPLACE]
-          else if(opSet.includes(lastChar) && opSet.includes(newChar)){
-            updated = newChar; /** l'ultimo operatore vince */
-            newData = replace(data, updated);
-          }
-          //operatore dopo numero || '' [ADD]
-          else if((numberSet.includes(lastChar) || lastChar === empty) && opSet.includes(newChar)){
-            //push nuvo input
-            updated = newChar;
-            newData = add(data, updated)
+          /** CLICK on . */
+          else if(newChar === "." && numberSet.includes(lastChar) ){
+              updated = lastInput + newChar;  
+              newData = replace(data, updated);
           }
           else {
-            console.log("Caso da gestire: ",);
+            console.log("********** Caso da gestire *****************");
           }
-          this.setState({
+
+        return this.setState({
             data: newData,
             equals: updated,
             expression: this.state.expression + newChar
