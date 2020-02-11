@@ -101,79 +101,120 @@ class App extends React.Component {
     this.state = {
       expression: '',
       equals: 0,
+      calcResult: 0,
       data: []
     }
   }
 
-  handleClear=()=>{
+  handleClear = () => {
     this.setState({
       expression: '',
       equals: 0,
-      data: []
+      data: [],
+      calcResult: 0,
     })
   }
 
-  onChange=(e)=>{
+  handleStartCalc = ({dataCalc, expr, char }) => {
+    console.log("handleStartCalc dataCalc: ", dataCalc );
+    console.log("handleStartCalc expr: ", expr);
+    console.log("handleStartCalc char: ", char);
+
+    this.setState({
+      calcResult: 0,
+      equals: char,
+      data: dataCalc,
+      expression: expr
+    })
+  }
+
+  onChange = (e) => {
     const newChar = e.target.value;
     const empty = "";
-    const { data } = this.state;
+    const { data, calcResult } = this.state;
 
     let lastInput = data.length > 0 ? data[this.state.data.length-1] : empty ;
     let lastChar = lastInput === empty ? empty : lastInput[lastInput.length-1];
     let updated = null;
     let newData = [];
 
-    if (isValid({lastInput, newChar})){
-        // newChar = .    lastChar numero   => [REPLACE]
-        if(newChar === "." && numberSet.includes(lastChar)){
-          updated = lastInput + newChar; //APPEND
-          newData = replace(data, updated);
-        }
-        //newChar = numero   lastChar operatore || ''  => [ADD]
-        else if((opSet.includes(lastChar) || lastChar === empty) && numberSet.includes(newChar)){
-          //push nuvo input
-          updated = newChar;
-          newData = add(data, updated)
-        }
-        //numero dopo numero o . [REPLACE]
-        else if(numberSet.includes(newChar)  && (numberSet.includes(lastChar) || lastChar === ".")) {
-          updated = lastInput + newChar;  //APPEND
-          newData = replace(data, updated)
-        }
-        // operatore dopo operatore  [REPLACE]
-        else if(opSet.includes(lastChar) && opSet.includes(newChar)){
-          updated = newChar; /** l'ultimo operatore vince */
-          newData = replace(data, updated);
-        }
-        //operatore dopo numero || '' [ADD]
-        else if((numberSet.includes(lastChar) || lastChar === empty) && opSet.includes(newChar)){
-          //push nuvo input
-          updated = newChar;
-          newData = add(data, updated)
-        }
-        else {
-          console.log("Caso da gestire: ",);
-        }
-        this.setState({
-          data: newData,
-          equals: updated,
-          expression: this.state.expression + newChar
-        })
+    if(calcResult > 0  ){
+      const updateCalc = {
+        char: newChar,
+        dataCalc: [],
+        expr: []
+      };
+      if(opSet.includes(newChar) ){
+        //start calc from result with newChar operator
+        updateCalc.dataCalc = add([], empty + calcResult);
+        updateCalc.dataCalc =  add(updateCalc.dataCalc, newChar);
+        updateCalc.expr =  add(updateCalc.expr, calcResult + newChar);
+      }
+      else {
+        //start calc with newChar
+        updateCalc.dataCalc = add([], empty + newChar);
+        updateCalc.expr = [...updateCalc.dataCalc];
+      }
+      return this.handleStartCalc(updateCalc)
+    }  
+    else{
+      if (isValid({lastInput, newChar})){
+          // newChar = .    lastChar numero   => [REPLACE]
+          if(newChar === "." && numberSet.includes(lastChar)){
+            updated = lastInput + newChar; //APPEND
+            newData = replace(data, updated);
+          }
+          //newChar = numero   lastChar operatore || ''  => [ADD]
+          else if((opSet.includes(lastChar) || lastChar === empty) && numberSet.includes(newChar)){
+            //push nuvo input
+            updated = newChar;
+            newData = add(data, updated)
+          }
+          //numero dopo numero o . [REPLACE]
+          else if(numberSet.includes(newChar)  && (numberSet.includes(lastChar) || lastChar === ".")) {
+            updated = lastInput + newChar;  //APPEND
+            newData = replace(data, updated)
+          }
+          // operatore dopo operatore  [REPLACE]
+          else if(opSet.includes(lastChar) && opSet.includes(newChar)){
+            updated = newChar; /** l'ultimo operatore vince */
+            newData = replace(data, updated);
+          }
+          //operatore dopo numero || '' [ADD]
+          else if((numberSet.includes(lastChar) || lastChar === empty) && opSet.includes(newChar)){
+            //push nuvo input
+            updated = newChar;
+            newData = add(data, updated)
+          }
+          else {
+            console.log("Caso da gestire: ",);
+          }
+          this.setState({
+            data: newData,
+            equals: updated,
+            expression: this.state.expression + newChar
+          })
+      }
+      else {
+        console.log("Input not valid: ", e.target.value)
+      }
     }
-    else {
-      console.log("Input not valid: ", e.target.value)
-    }
+    
   }
 
   onCalculus=()=>{
     
-    const { data } = this.state;
+    const { data, expression } = this.state;
     console.log("!!! onCalculus: ", data );
-    var result = getMagic(data);
+    console.log("!!! expression: ", expression );
 
+    var copyData = [...data];
+    var result = getMagic(copyData);
+    console.log("equals: ", result);
     this.setState({
-      equals: result,
-      expression: this.state.expression + "="+ result
+      equals: result + "",
+      calcResult: result,
+      expression: this.state.expression + "=" + result
     })
   }
 
