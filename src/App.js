@@ -17,18 +17,29 @@ function isValid({
   lastInput,
   newChar
 }){
-
-  //let lastChar = lastInput.slice(-1);
   let firstChar = lastInput[0];
   if(firstChar === "" && newChar === ".") return false;
   if(firstChar === "0" && newChar !== ".") return false;
-  //if(lastChar === "." && newChar === ".") return false;
   if(newChar === "." && lastInput.includes(".")) return false;
-
+  if(newChar === "." && lastInput === "") return false;
   return true;
 }
 
-function onClick(){}
+function calc(a, b, operator){
+  console.log(`calc: ${a} ${operator} ${b}` )
+  switch(operator){
+    case "*":
+      return parseFloat(a) * parseFloat(b);
+    case "/":
+      return parseFloat(a) / parseFloat(b);
+    case "+":
+      return parseFloat(a) + parseFloat(b);
+    case "-":
+      return parseFloat(a) - parseFloat(b);
+    default:
+      return 0
+  }
+}
 
 /**
  * 
@@ -39,43 +50,49 @@ function getMagic(list){
   if(list.length === 1){
     return list[0];
   }
-  var a, b, res, index, operator;
+  var  res, index;
   // cerca moltiplicazioni
   index = list.indexOf("*");
   if(index > -1) {
-    a = parseFloat(list[index-1]);
-    b = parseFloat(list[index+1]);
-    res = a*b;
+    res = calc(list[index-1], list[index+1], "*")
     //rimuovi 3 elementi da index-1 e inserisci il res in index-1
     list.splice( index-1, 3, res)
     return getMagic(list);
   }
   index = list.indexOf("/");
   if( index > -1){
-      //trova divisioni
-      a = parseFloat(list[index-1]);
-      b = parseFloat(list[index+1]);
-      res = a/b;
+      res = calc(list[index-1], list[index+1], "/")
       //rimuovi 3 elementi da index-1 e inserisci il res in index-1
       list.splice(index-1, 3, res)
       return getMagic(list);
   }
   //risolvi in ordine da sinistra a destra. qua abbiamo solo + e -
-  a = parseFloat(list[0]);
-  operator = list[1];
-  b = parseFloat(list[2]);
-
-  if(operator === "+"){
-    res = a + b;
-  }
-  else {
-    res = a - b;
-  }
+  res = calc(list[0], list[2], list[1])
   //rimuovi 3 elementi da 0 e inserisci il res a index 0
   list.splice(0, 3, res);
   return getMagic(list);
-
 }
+
+/**
+ * replace last element of list and return a copy of new list
+ */
+
+ function replace(list, updated){
+  return list.map( (item, i) => {
+    if(i === list.length-1) return updated;
+    else return item;
+  })
+ }
+
+ /**
+  * add elment to the end of list and return a copy of it
+  */
+ function add(list, el){
+   var listCopy = [...list];
+   listCopy.push(el);
+   return listCopy;
+ }
+
 
 class App extends React.Component {
 
@@ -98,47 +115,45 @@ class App extends React.Component {
 
   onChange=(e)=>{
     const newChar = e.target.value;
+    const empty = "";
     const { data } = this.state;
-    let lastInput =data.length > 0 ? data[this.state.data.length-1] : '' ;
-    let lastChar = lastInput === '' ? '' : lastInput[lastInput.length-1];
+
+    let lastInput = data.length > 0 ? data[this.state.data.length-1] : empty ;
+    let lastChar = lastInput === empty ? empty : lastInput[lastInput.length-1];
     let updated = null;
     let newData = [];
 
     if (isValid({lastInput, newChar})){
-        //numero dopo operatore
-        if((opSet.includes(lastChar) || lastChar === '') && numberSet.includes(newChar)){
+        // newChar = .    lastChar numero   => [REPLACE]
+        if(newChar === "." && numberSet.includes(lastChar)){
+          updated = lastInput + newChar; //APPEND
+          newData = replace(data, updated);
+        }
+        //newChar = numero   lastChar operatore || ''  => [ADD]
+        else if((opSet.includes(lastChar) || lastChar === empty) && numberSet.includes(newChar)){
           //push nuvo input
-          newData = [...data];
           updated = newChar;
-          newData.push(updated);
+          newData = add(data, updated)
         }
-        //numero dopo numero
-        else if(numberSet.includes(newChar) && numberSet.includes(lastChar)){
-          updated = lastInput + newChar;
-          newData = data.map( (item, i) => {
-            if(i === data.length-1) return updated;
-            else return item;
-          })
+        //numero dopo numero o . [REPLACE]
+        else if(numberSet.includes(newChar)  && (numberSet.includes(lastChar) || lastChar === ".")) {
+          updated = lastInput + newChar;  //APPEND
+          newData = replace(data, updated)
         }
-        // operatore dopo operatore
+        // operatore dopo operatore  [REPLACE]
         else if(opSet.includes(lastChar) && opSet.includes(newChar)){
           updated = newChar; /** l'ultimo operatore vince */
-          newData = data.map( (item, i) => {
-            if(i === data.length-1) return updated;
-            else return item;
-          })
+          newData = replace(data, updated);
         }
-        //operatore dopo numero
-        else if((numberSet.includes(lastChar) || lastChar === '') && opSet.includes(newChar)){
+        //operatore dopo numero || '' [ADD]
+        else if((numberSet.includes(lastChar) || lastChar === empty) && opSet.includes(newChar)){
           //push nuvo input
-          newData = [...data];
           updated = newChar;
-          newData.push(updated);
+          newData = add(data, updated)
         }
         else {
           console.log("Caso da gestire: ",);
         }
-        
         this.setState({
           data: newData,
           equals: updated,
